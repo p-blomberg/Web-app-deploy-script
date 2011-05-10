@@ -6,7 +6,7 @@ What does it do?
 ================
 1. It updates your (already created) working copy. (Do NOT use this working copy for development. You don't want conflicts here - ever!)
 2. It creates a new release name named release-YYYYMMDDHHIISS
-3. It runs `svn export $working_copy $EXPORT_TARGET $releasename`
+3. It runs `svn export $working_copy $EXPORT_TARGET/$releasename`
 4. It deletes a symlink (to your old release)
 5. It creates a symlink (to the new release)
 6. It deletes all releases older than ten deploys. Remember that a new deploy always is created when you run the deploy script, even if no changes have been made.
