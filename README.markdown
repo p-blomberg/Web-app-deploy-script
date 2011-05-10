@@ -16,7 +16,7 @@ How do I use it?
 1. Check out your svn repo on the production server. Creating a user and home directory for the project might be a good idea - then you can simply add ssh keys for everyone who should have access to deploy updates. On the downside, this means that you don't know who did the deploy.
 2. You should now have a working copy on the server. Remember that your entire working copy will be deployed - if you only want a subdirectory, i.e. "trunk" or "production", make your checkout more specific.
 3. Grab `deploy.sh` and `deploy_settings_example.sh`, put them somewhere that makes sense to you. (Perhaps the home directory of the project.)
-4. Have a look in `deploy_settings_example.sh`, change the paths.
+4. Have a look in `deploy_settings_example.sh`, change the paths. Rename the file to `deploy_settings.sh` when you're done.
 5. Create the export target folder ("releases"). Make sure to give enought privileges to the user who will run the deploy script.
 6. Move your current production folder into the export target folder. Create a symlink from your old location.
 7. Check privileges on the symlink. The deploy user needs to be able to delete the symlink and create it again.
