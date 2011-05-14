@@ -1,15 +1,25 @@
 #!/bin/bash
 
-DIR=`dirname "$0"`
-SETTINGS_FILE=$DIR/deploy_settings.sh
+if [ $# -gt 1 ]; then
+	echo "Bad usage"
+	exit 48
+fi
+
+if [ $# -eq 1 ]; then
+	SETTINGS_FILE=$1
+else
+	DIR=`dirname "$0"`
+	SETTINGS_FILE=$DIR/deploy_settings.sh
+fi
 
 if [ ! -e $SETTINGS_FILE ]; then
 	echo "Cannot find settings file. Expected location: $SETTINGS_FILE"
 	exit 47
 fi
 
-eval $($SETTINGS_FILE)
-if [ $? -eq 0 ]; then
+SETTINGS_FILE_OK=0
+eval $("/bin/bash" $SETTINGS_FILE)
+if [ $SETTINGS_FILE_OK -eq 1 ]; then
 	echo "***** Settings file eval OK"
 else
 	echo "***** Unable to eval settings file $SETTINGS_FILE" >&2
@@ -29,6 +39,46 @@ delete_lock_file_and_exit() {
 	exit $1	
 }
 
+# Create release name
+releasename="release-`date +%Y%m%d%H%M%S`"
+
+# Check that release path exists
+if [ ! -e $EXPORT_TARGET ]; then
+	echo "***** Export target $EXPORT_TARGET does not seem to exist. Aborting."
+	exit 46
+fi
+
+# Ask user to confirm
+echo "*********************************"
+echo "This is what I'll do:"
+echo "touch $LOCK_FILE"
+echo "svn up $RELEASE_WC"
+echo "svn export $RELEASE_WC $EXPORT_TARGET/$releasename"
+echo "rm $SYMLINK_PATH"
+echo "ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH"
+# Check old releases
+dirs=`ls $EXPORT_TARGET|sort -r`
+dir_count=`echo $dirs|wc -w`
+num_delete=$(($dir_count-8))
+if [ $num_delete -gt 0 ]; then
+	for dir in `echo $dirs|tail -n $num_delete`; do
+		#echo "Deleting $dir"
+		echo "rm -rf $dir"
+	done
+fi
+echo "rm $LOCK_FILE"
+echo "*********************************"
+answer="fail"
+#until (( "$answer" == "yes" )) || (( "$answer" == "no" )); do
+until [ "$answer" == "yes" ]; do
+	echo "Do you wish to continue? Please answer with yes or no."
+	read answer
+	if [ "$answer" == "no" ]; then
+		echo "Aborting."
+		exit 45
+	fi
+done
+
 # Check for lock file
 if [ -e $LOCK_FILE ]; then
         echo "***** Lock file $LOCK_FILE exists, bailing out." >&2
@@ -41,7 +91,7 @@ if [ $? -eq 0 ]; then
 	echo "***** Lock file created"
 else
 	echo "***** Unable to create lock file" >&2
-	delete_lock_file_and_exit 2
+	exit 2
 fi
 
 # Update checkout
@@ -53,8 +103,6 @@ else
 	delete_lock_file_and_exit 3
 fi
 
-# Create release name
-releasename="release-`date +%Y%m%d%H%M%S`"
 
 # Export
 svn export $RELEASE_WC $EXPORT_TARGET/$releasename
