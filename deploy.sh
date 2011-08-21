@@ -61,9 +61,13 @@ dirs=`ls $EXPORT_TARGET|sort -r`
 dir_count=`echo $dirs|wc -w`
 num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
-	for dir in `echo $dirs|tail -n $num_delete`; do
-		#echo "Deleting $dir"
+	deleted=0
+	for dir in `echo $dirs`; do
 		echo "rm -rf $dir"
+		deleted=$(($deleted+1))
+		if [ $deleted -eq $num_delete ]; then
+			break
+		fi
 	done
 fi
 echo "rm $LOCK_FILE"
@@ -137,11 +141,13 @@ dirs=`ls $EXPORT_TARGET|sort -r`
 dir_count=`echo $dirs|wc -w`
 num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
-	for dir in `echo $dirs|tail -n $num_delete`; do
-		echo "Deleting $dir"
+	deleted=0
+	for dir in `echo $dirs`; do
+		echo "rm -rf $dir"
 		rm -rf $dir
-		if [ $? -ne 0 ]; then
-			echo "***** Unable to delete $dir" >&2
+		deleted=$(($deleted+1))
+		if [ $deleted -eq $num_delete ]; then
+			break
 		fi
 	done
 fi
