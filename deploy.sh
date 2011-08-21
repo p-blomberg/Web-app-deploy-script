@@ -63,7 +63,7 @@ num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
 	deleted=0
 	for dir in `echo $dirs`; do
-		echo "rm -rf $dir"
+		echo "rm -rf $EXPORT_TARGET/$dir"
 		deleted=$(($deleted+1))
 		if [ $deleted -eq $num_delete ]; then
 			break
@@ -143,11 +143,8 @@ num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
 	deleted=0
 	for dir in `echo $dirs`; do
-		echo "rm -rf $dir"
-		rm -rf $dir
-		if [ $? -ne 0 ]; then
-			echo "***** Unable to delete $dir" >&2
-		fi
+		echo "rm -rf $EXPORT_TARGET/$dir"
+		rm -rf $EXPORT_TARGET/$dir
 		deleted=$(($deleted+1))
 		if [ $deleted -eq $num_delete ]; then
 			break
