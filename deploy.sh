@@ -57,7 +57,7 @@ echo "svn export $RELEASE_WC $EXPORT_TARGET/$releasename"
 echo "rm $SYMLINK_PATH"
 echo "ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH"
 # Check old releases
-dirs=`ls $EXPORT_TARGET|sort -r`
+dirs=`ls $EXPORT_TARGET`
 dir_count=`echo $dirs|wc -w`
 num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
@@ -137,7 +137,7 @@ fi
 
 # Delete old releases
 echo "***** Checking for old releases to remove"
-dirs=`ls $EXPORT_TARGET|sort -r`
+dirs=`ls $EXPORT_TARGET`
 dir_count=`echo $dirs|wc -w`
 num_delete=$(($dir_count-8))
 if [ $num_delete -gt 0 ]; then
