@@ -145,6 +145,9 @@ if [ $num_delete -gt 0 ]; then
 	for dir in `echo $dirs`; do
 		echo "rm -rf $dir"
 		rm -rf $dir
+		if [ $? -ne 0 ]; then
+			echo "***** Unable to delete $dir" >&2
+		fi
 		deleted=$(($deleted+1))
 		if [ $deleted -eq $num_delete ]; then
 			break
