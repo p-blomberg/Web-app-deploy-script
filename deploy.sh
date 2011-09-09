@@ -18,11 +18,11 @@ if [ ! -e $SETTINGS_FILE ]; then
 fi
 
 SETTINGS_FILE_OK=0
-eval $("/bin/bash" $SETTINGS_FILE)
+source "$SETTINGS_FILE"
 if [ $SETTINGS_FILE_OK -eq 1 ]; then
-	echo "***** Settings file eval OK"
+	echo "***** Settings file OK"
 else
-	echo "***** Unable to eval settings file $SETTINGS_FILE" >&2
+	echo "***** Unable to parse settings file $SETTINGS_FILE" >&2
 	exit 123
 fi
 
