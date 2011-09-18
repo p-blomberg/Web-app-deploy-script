@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# nullglob is required for globbing release-list (if no releases exists)
+shopt -s nullglob
+
 ################ Functions ###########################
 
 update_repo_cmd() {
@@ -67,7 +70,7 @@ fi
 
 
 # Create release name
-releasename="release-`date +%Y%m%d%H%M%S`"
+releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
 
 # Check that release path exists
 if [ ! -e $EXPORT_TARGET ]; then
@@ -88,6 +91,15 @@ git)
 	exit 49
 esac
 
+# Create list of old releases to an array called "prune"
+releases=($EXPORT_TARGET/${prefix:-release}-* $EXPORT_TARGET/$releasename)
+prune=()
+while [[ ${#releases[*]} -gt 8 ]]; do
+		# pop first element from array, store it in "prune"
+		prune+=(${releases[0]})
+		releases=(${releases[@]:1})
+done
+
 # Ask user to confirm
 echo "*********************************"
 echo "This is what I'll do:"
@@ -96,20 +108,9 @@ update_repo_cmd
 export_repo_cmd
 echo "rm $SYMLINK_PATH"
 echo "ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH"
-# Check old releases
-dirs=`ls $EXPORT_TARGET`
-dir_count=`echo $dirs|wc -w`
-num_delete=$(($dir_count-8))
-if [ $num_delete -gt 0 ]; then
-	deleted=0
-	for dir in `echo $dirs`; do
-		echo "rm -rf $EXPORT_TARGET/$dir"
-		deleted=$(($deleted+1))
-		if [ $deleted -eq $num_delete ]; then
-			break
-		fi
-	done
-fi
+for dir in ${prune[@]}; do
+		echo "rm -rf $dir"
+done
 echo "rm $LOCK_FILE"
 echo "*********************************"
 answer="fail"
@@ -177,20 +178,9 @@ fi
 
 # Delete old releases
 echo "***** Checking for old releases to remove"
-dirs=`ls $EXPORT_TARGET`
-dir_count=`echo $dirs|wc -w`
-num_delete=$(($dir_count-8))
-if [ $num_delete -gt 0 ]; then
-	deleted=0
-	for dir in `echo $dirs`; do
-		echo "rm -rf $EXPORT_TARGET/$dir"
-		rm -rf $EXPORT_TARGET/$dir
-		deleted=$(($deleted+1))
-		if [ $deleted -eq $num_delete ]; then
-			break
-		fi
-	done
-fi
+for dir in ${prune[@]}; do
+		rm -rf $dir
+done
 
 # Yay, done!
 echo "***** Done."
