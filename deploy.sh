@@ -40,6 +40,29 @@ delete_lock_file_and_exit() {
 	exit $1	
 }
 
+function symlink_update() {
+		local src=$1
+		local dst=$2
+		
+		# remove old symlink
+		if [[ -e $dst ]]; then
+				rm $dst
+				if [[ $? -ne 0 ]]; then
+						echo "***** Unable to delete production symlink" >&2
+						delete_lock_file_and_exit 5
+				fi
+		fi
+		
+		# create new symlink
+		ln -s $src $dst
+		if [ $? -eq 0 ]; then
+				echo "***** Production symlink created"
+		else
+				echo "***** Unable to create production symlink" >&2
+				delete_lock_file_and_exit 6
+		fi
+}
+
 ############## END FUNCTIONS ####################3
 
 if [ $# -gt 1 ]; then
@@ -158,23 +181,8 @@ else
         delete_lock_file_and_exit 4
 fi
 
-# Delete symlink
-rm $SYMLINK_PATH
-if [ $? -eq 0 ]; then
-        echo "***** Production symlink deleted"
-else
-        echo "***** Unable to delete production symlink" >&2
-        delete_lock_file_and_exit 5
-fi
-
-# create symlink
-ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH
-if [ $? -eq 0 ]; then
-        echo "***** Production symlink created"
-else
-        echo "***** Unable to create production symlink" >&2
-        delete_lock_file_and_exit 6
-fi
+# update symlink
+symlink_update $EXPORT_TARGET/$releasename $SYMLINK_PATH
 
 # Delete old releases
 echo "***** Checking for old releases to remove"
