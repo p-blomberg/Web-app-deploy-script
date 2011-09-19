@@ -114,6 +114,12 @@ git)
 	exit 49
 esac
 
+# abort if the working copy doesn't exist
+if [ ! -e ${RELEASE_WC} ]; then
+		echo "$0: Working copy '${RELEASE_WC}\` does not exist" > /dev/stderr
+		exit 1
+fi
+
 # Create list of old releases to an array called "prune"
 releases=($EXPORT_TARGET/${prefix:-release}-* $EXPORT_TARGET/$releasename)
 prune=()
