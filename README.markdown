@@ -1,6 +1,6 @@
 What is this?
 =============
-This is a simple script to push new versions of svn projects to a production directory on a web server.
+This is a simple script to push new versions of svn or git projects to a production directory on a web server.
 
 What does it do?
 ================
