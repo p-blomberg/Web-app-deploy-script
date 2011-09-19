@@ -1,5 +1,44 @@
 #!/bin/bash
 
+################ Functions ###########################
+
+update_repo_cmd() {
+	case $VCS in
+		svn)
+			echo "svn up \"$RELEASE_WC\""
+			;;
+		git)
+			echo "(cd \"$RELEASE_WC\"; git pull)"
+			;;
+	esac
+}
+
+export_repo_cmd() {
+	case $VCS in
+		svn)
+			echo "svn export \"$RELEASE_WC\" \"$EXPORT_TARGET/$releasename\""
+			;;
+		git)
+			echo "(cd \"$RELEASE_WC\"; git checkout-index -a -f --prefix=\"$EXPORT_TARGET/$releasename/\" )"
+			;;
+	esac
+}
+
+delete_lock_file_and_exit() {
+	# Delete lock file
+	rm $LOCK_FILE
+	if [ $? -eq 0 ]; then
+		echo "***** Lock file deleted successfully."
+	else
+		echo "***** Failed to delete lock file." >&2
+		exit 666
+	fi
+
+	exit $1	
+}
+
+############## END FUNCTIONS ####################3
+
 if [ $# -gt 1 ]; then
 	echo "Bad usage"
 	exit 48
@@ -18,26 +57,14 @@ if [ ! -e $SETTINGS_FILE ]; then
 fi
 
 SETTINGS_FILE_OK=0
-eval $("/bin/bash" $SETTINGS_FILE)
+source "$SETTINGS_FILE"
 if [ $SETTINGS_FILE_OK -eq 1 ]; then
-	echo "***** Settings file eval OK"
+	echo "***** Settings file OK"
 else
-	echo "***** Unable to eval settings file $SETTINGS_FILE" >&2
+	echo "***** Unable to parse settings file $SETTINGS_FILE" >&2
 	exit 123
 fi
 
-delete_lock_file_and_exit() {
-	# Delete lock file
-	rm $LOCK_FILE
-	if [ $? -eq 0 ]; then
-		echo "***** Lock file deleted successfully."
-	else
-		echo "***** Failed to delete lock file." >&2
-		exit 666
-	fi
-
-	exit $1	
-}
 
 # Create release name
 releasename="release-`date +%Y%m%d%H%M%S`"
@@ -48,12 +75,25 @@ if [ ! -e $EXPORT_TARGET ]; then
 	exit 46
 fi
 
+# Check vcs that we support selected vcs:
+case $VCS in
+svn)
+	echo "***** Using SVN"
+	;;
+git)
+	echo "***** Using GIT"
+	;;
+*)
+	echo "***** Unknown vcs specifed: $VCS. Aborting."
+	exit 49
+esac
+
 # Ask user to confirm
 echo "*********************************"
 echo "This is what I'll do:"
 echo "touch $LOCK_FILE"
-echo "svn up $RELEASE_WC"
-echo "svn export $RELEASE_WC $EXPORT_TARGET/$releasename"
+update_repo_cmd
+export_repo_cmd
 echo "rm $SYMLINK_PATH"
 echo "ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH"
 # Check old releases
@@ -99,17 +139,17 @@ else
 fi
 
 # Update checkout
-svn up $RELEASE_WC
+eval `update_repo_cmd`
 if [ $? -eq 0 ]; then
 	echo "***** Update completed"
 else
-	echo "***** Unable to do 'svn up'" >&2
+	echo "***** Unable to do update local repository" >&2
 	delete_lock_file_and_exit 3
 fi
 
 
 # Export
-svn export $RELEASE_WC $EXPORT_TARGET/$releasename
+eval `export_repo_cmd`
 if [ $? -eq 0 ]; then
         echo "***** Export created"
 else

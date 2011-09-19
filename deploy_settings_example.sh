@@ -1,8 +1,9 @@
 #!/bin/bash
 
-echo LOCK_FILE=/home/gnafs/deploy.lock
-echo RELEASE_WC=/home/gnafs/working_copy
-echo EXPORT_TARGET=/var/www/gnafs/releases
-echo SYMLINK_PATH=/var/www/gnafs/gnafs.se
+LOCK_FILE=deploy.lock
+VCS="svn" #svn or git supported
+RELEASE_WC=working_copy
+EXPORT_TARGET=/var/www/site/releases
+SYMLINK_PATH=/var/www/site/example.com
 
-echo SETTINGS_FILE_OK=1
+SETTINGS_FILE_OK=1
