@@ -45,7 +45,7 @@ function symlink_update() {
 		local dst=$2
 		
 		# remove old symlink
-		if [[ -e $dst ]]; then
+		if [[ -L $dst ]]; then
 				rm $dst
 				if [[ $? -ne 0 ]]; then
 						echo "***** Unable to delete production symlink" >&2
@@ -118,6 +118,14 @@ esac
 if [ ! -e ${RELEASE_WC} ]; then
 		echo "$0: Working copy '${RELEASE_WC}\` does not exist" > /dev/stderr
 		exit 1
+fi
+
+# abort if SYMLINK_PATH exists but is not a symlink
+if [[ ( -e ${SYMLINK_PATH} ) && (! -L ${SYMLINK_PATH}) ]]; then
+		echo "$0: SYMLINK_PATH already exists but it not a symlink. Check configuration and/or remove ${SYMLINK_PATH} manually."
+		exit 1
+elif [[ (-L ${SYMLINK_PATH}) && (! -e ${SYMLINK_PATH}) ]]; then
+		echo "$0: Warning: ${SYMLINK_PATH} is a dangling symlink."
 fi
 
 # Create list of old releases to an array called "prune"
