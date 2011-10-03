@@ -148,6 +148,11 @@ echo "ln -s $EXPORT_TARGET/$releasename $SYMLINK_PATH"
 for dir in ${prune[@]}; do
 		echo "rm -rf $dir"
 done
+if [[ ${PRUNE:+1} ]]; then
+		for pattern in "${PRUNE[@]}"; do
+				echo "find \"${EXPORT_TARGET}/$releasename\" -regex \"${pattern}\" -delete"
+		done
+fi
 echo "rm $LOCK_FILE"
 echo "*********************************"
 answer="fail"
@@ -193,6 +198,13 @@ if [ $? -eq 0 ]; then
 else
         echo "***** Unable to create export" >&2
         delete_lock_file_and_exit 4
+fi
+
+# Prune files
+if [[ ${PRUNE:+1} ]]; then
+		for pattern in "${PRUNE[@]}"; do
+				find "${EXPORT_TARGET}/$releasename" -regex "${pattern}" -delete -printf "%p removed\n"
+		done
 fi
 
 # update symlink

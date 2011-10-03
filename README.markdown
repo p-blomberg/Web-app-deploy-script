@@ -21,3 +21,10 @@ How do I use it?
 6. Move your current production folder into the export target folder. Create a symlink from your old location.
 7. Check privileges on the symlink. The deploy user needs to be able to delete the symlink and create it again.
 8. Log in as the correct user and give it a try.
+
+File pruning
+------------
+
+PRUNE is a bash array of regex patterns which will be removed from the release, e.g. you keep .xcf-files in the repository which you don't want to include in the releases.
+
+    PRUNE=(".*\.xcf")
