@@ -131,7 +131,7 @@ fi
 # Create list of old releases to an array called "prune"
 releases=($EXPORT_TARGET/${prefix:-release}-* $EXPORT_TARGET/$releasename)
 prune=()
-while [[ ${#releases[*]} -gt 8 ]]; do
+while [[ ${#releases[*]} -gt ${RELEASE_COUNT:-8} ]]; do
 		# pop first element from array, store it in "prune"
 		prune+=(${releases[0]})
 		releases=(${releases[@]:1})
