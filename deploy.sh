@@ -5,6 +5,10 @@ shopt -s nullglob
 
 ################ Functions ###########################
 
+update_pre_hook(){
+		return 0
+}
+
 update_repo_cmd() {
 	case $VCS in
 		svn)
@@ -16,6 +20,34 @@ update_repo_cmd() {
 	esac
 }
 
+update_post_hook(){
+		return 0
+}
+
+do_update(){
+		stage="update"
+		echo "***** Stage: update"
+		if ! update_pre_hook; then
+				echo "update_pre_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 3
+		fi
+		eval `update_repo_cmd`
+		if [ $? -eq 0 ]; then
+				echo "***** Update completed"
+		else
+				echo "***** Unable to do update local repository" >&2
+				delete_lock_file_and_exit 3
+		fi
+		if ! update_post_hook; then
+				echo "update_post_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 3
+		fi
+}
+
+export_pre_hook(){
+		return 0
+}
+
 export_repo_cmd() {
 	case $VCS in
 		svn)
@@ -25,6 +57,43 @@ export_repo_cmd() {
 			echo "(cd \"$RELEASE_WC\"; git checkout-index -a -f --prefix=\"$EXPORT_TARGET/$releasename/\" )"
 			;;
 	esac
+}
+
+export_post_hook(){
+		file_prune
+		return $?
+}
+
+do_export(){
+		stage="export"
+		echo "***** Stage: export"
+		if ! export_pre_hook; then
+				echo "export_pre_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 4
+		fi
+		eval `export_repo_cmd`
+		if [ $? -eq 0 ]; then
+        echo "***** Export created"
+		else
+        echo "***** Unable to create export" >&2
+        delete_lock_file_and_exit 4
+		fi
+		if ! export_post_hook; then
+				echo "export_post_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 4
+		fi
+}
+
+file_prune(){
+		if [[ ${stage} != "export" ]]; then
+				echo "file_prune called from stage \"${stage}\", not \"export\" as it should"
+				delete_lock_file_and_exit 4
+		fi
+		if [[ ${PRUNE:+1} ]]; then
+				for pattern in "${PRUNE[@]}"; do
+						find "${EXPORT_TARGET}/$releasename" -regex "${pattern}" -delete -printf "%p removed\n"
+				done
+		fi
 }
 
 delete_lock_file_and_exit() {
@@ -40,27 +109,47 @@ delete_lock_file_and_exit() {
 	exit $1	
 }
 
+symlink_pre_hook(){
+		return 0
+}
+
 function symlink_update() {
 		local src=$1
 		local dst=$2
 		
 		# remove old symlink
 		if [[ -L $dst ]]; then
-				rm $dst
-				if [[ $? -ne 0 ]]; then
+				
+				if ! rm $dst; then
 						echo "***** Unable to delete production symlink" >&2
 						delete_lock_file_and_exit 5
 				fi
 		fi
 		
 		# create new symlink
-		ln -s $src $dst
-		if [ $? -eq 0 ]; then
-				echo "***** Production symlink created"
-		else
+		if ! ln -s $src $dst; then
 				echo "***** Unable to create production symlink" >&2
-				delete_lock_file_and_exit 6
+				delete_lock_file_and_exit 5
 		fi
+}
+
+symlink_post_hook(){
+		return 0
+}
+
+do_symlink(){
+		stage="symlink"
+		echo "***** Stage: ${stage}"
+		if ! symlink_pre_hook; then
+				echo "symlin_pre_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 5
+		fi
+		symlink_update $EXPORT_TARGET/$releasename $SYMLINK_PATH
+		if ! symlink_post_hook; then
+				echo "symlin_post_hook returned non-zero status, aborting"
+				delete_lock_file_and_exit 5
+		fi
+		echo "***** Stage: ${stage} ok"
 }
 
 ############## END FUNCTIONS ####################3
@@ -181,34 +270,16 @@ else
 	exit 2
 fi
 
-# Update checkout
-eval `update_repo_cmd`
-if [ $? -eq 0 ]; then
-	echo "***** Update completed"
-else
-	echo "***** Unable to do update local repository" >&2
-	delete_lock_file_and_exit 3
-fi
+stage=none
 
+# Update checkout
+do_update
 
 # Export
-eval `export_repo_cmd`
-if [ $? -eq 0 ]; then
-        echo "***** Export created"
-else
-        echo "***** Unable to create export" >&2
-        delete_lock_file_and_exit 4
-fi
-
-# Prune files
-if [[ ${PRUNE:+1} ]]; then
-		for pattern in "${PRUNE[@]}"; do
-				find "${EXPORT_TARGET}/$releasename" -regex "${pattern}" -delete -printf "%p removed\n"
-		done
-fi
+do_export
 
 # update symlink
-symlink_update $EXPORT_TARGET/$releasename $SYMLINK_PATH
+do_symlink
 
 # Delete old releases
 echo "***** Checking for old releases to remove"
