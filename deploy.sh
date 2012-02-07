@@ -67,6 +67,7 @@ export_post_hook(){
 do_export(){
 		stage="export"
 		echo "***** Stage: export"
+		DST="${EXPORT_TARGET}/${releasename}"
 		if ! export_pre_hook; then
 				echo "export_pre_hook returned non-zero status, aborting"
 				delete_lock_file_and_exit 4

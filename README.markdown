@@ -28,3 +28,19 @@ File pruning
 PRUNE is a bash array of regex patterns which will be removed from the release, e.g. you keep .xcf-files in the repository which you don't want to include in the releases.
 
     PRUNE=(".*\.xcf")
+
+Hooks
+-----
+
+All three stages support pre/post hooks:
+
+* update
+* export
+* symlink
+
+    export_post_hook(){
+      cp settings.php ${DST}
+    }
+
+If a hook returns non-zero the deploy fails. In addition to the variables
+provided in settings DST is set to ```${EXPORT_TARGET}/${releasename}```.
