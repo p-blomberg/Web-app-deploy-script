@@ -216,24 +216,32 @@ if [ ! -e $EXPORT_TARGET ]; then
 		exit 1
 fi
 
-# Check vcs that we support selected vcs:
-case $VCS in
-		svn)
-				echo "${infostar} Using SVN"
-				;;
-		git)
-				echo "${infostar} Using GIT"
-				;;
-		*)
-				echo "${errstar} Unknown vcs specifed: $VCS. Aborting."
-				exit 1
-esac
-
 # abort if the working copy doesn't exist
 if [ ! -e ${RELEASE_WC} ]; then
 		echo "${errstar} Working copy '${RELEASE_WC}\` does not exist"
 		exit 1
 fi
+
+# Check vcs that we support selected vcs:
+case $VCS in
+		svn)
+				echo "${infostar} Using SVN"
+				if [ ! -e ${RELEASE_WC}/.svn ]; then
+						echo "${errstar} Export target ${RELEASE_WC} is not a subversion repository. Aborting."
+						exit 1
+				fi
+				;;
+		git)
+				echo "${infostar} Using GIT (${RELEASE_WC})"
+				if [ ! -e ${RELEASE_WC}/.git ]; then
+						echo "${errstar} Export target ${RELEASE_WC} is not a git repository. Aborting."
+						exit 1
+				fi
+				;;
+		*)
+				echo "${errstar} Unknown vcs specifed: $VCS. Aborting."
+				exit 1
+esac
 
 # abort if SYMLINK_PATH exists but is not a symlink
 if [[ ( -e ${SYMLINK_PATH} ) && (! -L ${SYMLINK_PATH}) ]]; then
