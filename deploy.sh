@@ -179,15 +179,19 @@ do_prune(){
 		phase_end
 }
 
+# Called when script finishes or if user aborts
 cleanup(){
-		rm -f $LOCK_FILE
+		rm -f $LOCK_FILE || die
+		popd > /dev/null
+}
+
+handle_sigint(){
+		cleanup
 		echo -e "\n${errstar} Deploy aborted."
 		exit 1
 }
 
 ############## END FUNCTIONS ####################3
-
-trap cleanup SIGINT
 
 if [ $# -gt 1 ]; then
 		echo "Bad usage"
@@ -197,8 +201,7 @@ fi
 if [ $# -eq 1 ]; then
 		SETTINGS_FILE=$1
 else
-		DIR=`dirname "$0"`
-		SETTINGS_FILE=$DIR/deploy_settings.sh
+		SETTINGS_FILE=$(dirname "$0")/deploy_settings.sh
 fi
 
 if [ ! -e $SETTINGS_FILE ]; then
@@ -215,13 +218,22 @@ else
 		exit 1
 fi
 
+# Move to correct working directory if script is called from another location to
+# fix relative paths
+DIR=$(readlink -f $(dirname "${SETTINGS_FILE}"))
+echo "${infostar} Working directory: ${DIR}"
+pushd ${DIR} > /dev/null
+
+# Catch ctrl-c
+# This should be done after pushd since it calls popd to restore cwd
+trap handle_sigint SIGINT
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
 DST="${EXPORT_TARGET}/${releasename}"
 
 # Check that release path exists
-if [ ! -e $EXPORT_TARGET ]; then
+if [ ! -e "${EXPORT_TARGET}" ]; then
 		echo "${errstar} Export target $EXPORT_TARGET does not seem to exist. Aborting."
 		exit 1
 fi
@@ -319,5 +331,7 @@ do_export
 do_symlink
 do_prune
 
-rm $LOCK_FILE || die
+# remove lock and restore cwd
+cleanup
+
 echo "${infostar} Deploy complete."
