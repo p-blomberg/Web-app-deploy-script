@@ -295,7 +295,7 @@ fi
 # Ask user to confirm
 echo
 echo "*********************************"
-echo "This is what I'll do:"
+echo "This is what I'll do (excluding hooks):"
 echo "  touch $LOCK_FILE"
 echo -n "  "; update_repo_cmd
 echo -n "  "; export_repo_cmd
