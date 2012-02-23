@@ -230,7 +230,7 @@ trap handle_sigint SIGINT
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
-DST="${EXPORT_TARGET}/${releasename}"
+DST="${DIR}/${EXPORT_TARGET}/${releasename}"
 
 # Check that release path exists
 if [ ! -e "${EXPORT_TARGET}" ]; then
