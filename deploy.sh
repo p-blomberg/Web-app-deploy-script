@@ -164,7 +164,7 @@ do_symlink(){
 		stage="symlink"
 		phase_start
 		symlink_pre_hook || die "symlin_pre_hook returned non-zero status, aborting"
-		symlink_update $EXPORT_TARGET/$releasename $SYMLINK_PATH || die
+		symlink_update $DST $SYMLINK_PATH || die
 		symlink_post_hook || die "symlin_post_hook returned non-zero status, aborting"
 		phase_end
 }
