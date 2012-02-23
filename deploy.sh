@@ -235,6 +235,10 @@ case $VCS in
 				echo "${infostar} Using GIT (${RELEASE_WC})"
 				if [ ! -e ${RELEASE_WC}/.git ]; then
 						echo "${errstar} Export target ${RELEASE_WC} is not a git repository. Aborting."
+						echo "${errstar} You should initialize the folder by cloning the repository of your choice and checkout the correct branch, e.g:"
+						echo "${errstar}   1. git clone git@example.net:REPO \"${RELEASE_WC}\""
+						echo "${errstar}   2. cd \"${RELEASE_WC}\""
+						echo "${errstar}   3. git checkout BRANCH"
 						exit 1
 				fi
 				;;
