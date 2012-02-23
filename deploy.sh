@@ -27,7 +27,7 @@ fi
 errstar="${bold}${red} * ${normal}"
 infostar="${bold}${green} * ${normal}"
 
-LOCK_FILE=.deploy.lock
+LOCK_FILE=.$(basename $1 .sh).lock
 
 ################ Functions ###########################
 
