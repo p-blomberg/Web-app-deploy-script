@@ -27,6 +27,8 @@ fi
 errstar="${bold}${red} * ${normal}"
 infostar="${bold}${green} * ${normal}"
 
+LOCK_FILE=.deploy.lock
+
 ################ Functions ###########################
 
 die(){
@@ -266,7 +268,7 @@ done
 
 # Check for lock file
 if [ -e $LOCK_FILE ]; then
-    echo "${errstar} Lock file $LOCK_FILE exists, bailing out." >&2
+    echo "${errstar} Lock file \"$LOCK_FILE\" exists, bailing out." >&2
     exit 1
 fi
 
