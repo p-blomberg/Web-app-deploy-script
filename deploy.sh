@@ -179,7 +179,15 @@ do_prune(){
 		phase_end
 }
 
+cleanup(){
+		rm -f $LOCK_FILE
+		echo -e "\n${errstar} Deploy aborted."
+		exit 1
+}
+
 ############## END FUNCTIONS ####################3
+
+trap cleanup SIGINT
 
 if [ $# -gt 1 ]; then
 		echo "Bad usage"
