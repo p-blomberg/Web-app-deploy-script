@@ -54,7 +54,9 @@ export_repo_cmd() {
 			echo "svn export \"$RELEASE_WC\" \"$EXPORT_TARGET/$releasename\""
 			;;
 		git)
-			echo "(cd \"$RELEASE_WC\"; git checkout-index -a -f --prefix=\"$EXPORT_TARGET/$releasename/\" )"
+			# Until git 1.8 (where git export-index support submodules) must use rsync with --exclude='.git'
+			# echo "(cd \"$RELEASE_WC/\"; git checkout-index -a -f --prefix=\"$EXPORT_TARGET/$releasename\" )"
+			echo "rsync -av --exclude='.git' \"$RELEASE_WC/\" \"$EXPORT_TARGET/$releasename\"" 
 			;;
 	esac
 }
