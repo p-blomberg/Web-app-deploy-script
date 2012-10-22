@@ -312,10 +312,10 @@ echo "  rm $LOCK_FILE"
 echo "*********************************"
 echo
 answer="fail"
-until [ "$answer" == "yes" ]; do
+until [[ "$answer" = "yes" ]]; do
 		echo -n "${bold}Do you wish to continue?${normal} [${green}yes${normal}/${red}no${normal}] "
 		read answer
-		if [ "$answer" == "no" ]; then
+		if [[ "$answer" = "no" ]]; then
 				echo "Aborting."
 				exit 45
 		fi
