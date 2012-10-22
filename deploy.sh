@@ -226,6 +226,7 @@ fi
 # fix relative paths
 DIR=$(readlink -f $(dirname "${SETTINGS_FILE}"))
 echo "${infostar} Working directory: ${DIR}"
+cd ${DIR}
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
