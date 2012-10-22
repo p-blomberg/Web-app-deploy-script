@@ -149,13 +149,13 @@ function symlink_update() {
 		local src=$1
 		local dst=$2
 		
-		# remove old symlink
 		if [[ -L $dst ]]; then
-				rm $dst || die "Unable to delete production symlink"
+				# create new symlink
+				ln -s $src ${dst}_tmp || die "Unable to create new symlink"
+
+				# replace old symlink
+				mv -Tf ${dst}_tmp $dst || die "Unable to replace production symlink"
 		fi
-		
-		# create new symlink
-		ln -s $src $dst || die "Unable to create production symlink"
 }
 
 symlink_post_hook(){
