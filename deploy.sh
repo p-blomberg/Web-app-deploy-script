@@ -184,7 +184,6 @@ do_prune(){
 # Called when script finishes or if user aborts
 cleanup(){
 		rm -f $LOCK_FILE || die
-		popd > /dev/null
 }
 
 handle_sigint(){
@@ -194,6 +193,9 @@ handle_sigint(){
 }
 
 ############## END FUNCTIONS ####################3
+
+# Catch ctrl-c
+trap handle_sigint SIGINT
 
 if [ $# -gt 1 ]; then
 		echo "Bad usage"
@@ -224,11 +226,6 @@ fi
 # fix relative paths
 DIR=$(readlink -f $(dirname "${SETTINGS_FILE}"))
 echo "${infostar} Working directory: ${DIR}"
-pushd ${DIR} > /dev/null
-
-# Catch ctrl-c
-# This should be done after pushd since it calls popd to restore cwd
-trap handle_sigint SIGINT
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
