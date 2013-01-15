@@ -148,14 +148,12 @@ symlink_pre_hook(){
 symlink_update() {
 		local src=$1
 		local dst=$2
-		
-		if [[ -L $dst ]]; then
-				# create new symlink
-				ln -s $src ${dst}_tmp || die "Unable to create new symlink"
 
-				# replace old symlink
-				mv -Tf ${dst}_tmp $dst || die "Unable to replace production symlink"
-		fi
+		# create new symlink
+		ln -s $src ${dst}_tmp || die "Unable to create new symlink"
+
+		# replace old symlink
+		mv -Tf ${dst}_tmp $dst || die "Unable to replace production symlink"
 }
 
 symlink_post_hook(){
