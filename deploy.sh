@@ -145,7 +145,7 @@ symlink_pre_hook(){
 		return 0
 }
 
-function symlink_update() {
+symlink_update() {
 		local src=$1
 		local dst=$2
 		
