@@ -111,7 +111,7 @@ export_repo_cmd() {
 		git)
 			# Until git 1.8 (where git export-index support submodules) must use rsync with --exclude='.git'
 			# echo "(cd \"$RELEASE_WC/\"; git checkout-index -a -f --prefix=\"$EXPORT_TARGET/$releasename\" )"
-			echo "rsync -av --exclude='.git' \"$RELEASE_WC/\" \"${DST}\"" 
+			echo "rsync -av --exclude='.git' \"$RELEASE_WC/\" \"${DST}\""
 			;;
 	esac
 }
