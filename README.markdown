@@ -47,5 +47,4 @@ e.g:
 If a hook returns non-zero the deploy fails. In addition to the variables
 provided in settings DST is set to ```${EXPORT_TARGET}/${releasename}```.
 
-If you use a custom ```export_post_hook``` and use file pruning you must manually call
-```file_prune```.
+If you use a custom ```export_post_hook``` and use file pruning you must manually call ```file_prune```.
