@@ -228,7 +228,7 @@ cd ${DIR}
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
-DST="${DIR}/${EXPORT_TARGET}/${releasename}"
+DST=$(readlink -f "${EXPORT_TARGET}/${releasename}")
 
 # Check that release path exists
 if [ ! -e "${EXPORT_TARGET}" ]; then
