@@ -228,7 +228,7 @@ cd ${DIR}
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
-DST="${DIR}/${EXPORT_TARGET}/${releasename}"
+DST=$(readlink -f "${EXPORT_TARGET}/${releasename}")
 
 # Check that release path exists
 if [ ! -e "${EXPORT_TARGET}" ]; then
@@ -241,6 +241,9 @@ if [ ! -e ${RELEASE_WC} ]; then
 		echo "${errstar} Working copy '${RELEASE_WC}\` does not exist"
 		exit 1
 fi
+
+# normalize symlink path
+SYMLINK_PATH=$(readlink -f "$SYMLINK_PATH")
 
 # Check vcs that we support selected vcs:
 case $VCS in
