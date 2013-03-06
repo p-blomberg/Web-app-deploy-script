@@ -301,7 +301,7 @@ echo "  touch $LOCK_FILE"
 echo -n "  "; update_repo_cmd
 echo -n "  "; export_repo_cmd
 echo "  ln -s $DST ${SYMLINK_PATH}_tmp"
-echo "  mv -Tf ${dst}_tmp $dst"
+echo "  mv -Tf ${DST}_tmp $dst"
 for dir in ${prune[@]}; do
 		echo "  rm -rf $dir"
 done
