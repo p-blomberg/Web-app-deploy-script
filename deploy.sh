@@ -242,6 +242,9 @@ if [ ! -e ${RELEASE_WC} ]; then
 		exit 1
 fi
 
+# normalize symlink path
+SYMLINK_PATH=$(readlink -f "$SYMLINK_PATH")
+
 # Check vcs that we support selected vcs:
 case $VCS in
 		svn)
