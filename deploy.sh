@@ -297,8 +297,8 @@ echo "This is what I'll do (excluding hooks):"
 echo "  touch $LOCK_FILE"
 echo -n "  "; update_repo_cmd
 echo -n "  "; export_repo_cmd
-echo "  rm $SYMLINK_PATH"
-echo "  ln -s $DST $SYMLINK_PATH"
+echo "  ln -s $DST ${SYMLINK_PATH}_tmp"
+echo "  mv -Tf ${dst}_tmp $dst"
 for dir in ${prune[@]}; do
 		echo "  rm -rf $dir"
 done
