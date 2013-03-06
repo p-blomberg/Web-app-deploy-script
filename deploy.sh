@@ -181,13 +181,21 @@ do_prune(){
 
 # Called when script finishes or if user aborts
 cleanup(){
-		rm -f $LOCK_FILE || die
+		rm $LOCK_FILE || die
 }
 
 handle_sigint(){
 		cleanup
 		echo -e "\n${errstar} Deploy aborted."
 		exit 1
+}
+
+# This prints the path verbatim if it begins with a /.
+# If not it must be a relative path, so it prepends
+# $PWD to the front.
+# The #./ part strips off ./ from the front of $1.
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 
 ############## END FUNCTIONS ####################3
@@ -220,15 +228,21 @@ else
 		exit 1
 fi
 
+# normalize some important paths
+LOCK_FILE=$(realpath "$LOCK_FILE")
+SYMLINK_PATH=$(realpath "$SYMLINK_PATH")
+RELEASE_WC=$(realpath "$RELEASE_WC")
+EXPORT_TARGET=$(realpath "$EXPORT_TARGET")
+
 # Move to correct working directory if script is called from another location to
 # fix relative paths
-DIR=$(readlink -f $(dirname "${SETTINGS_FILE}"))
+DIR=$(realpath $(dirname "${SETTINGS_FILE}"))
 echo "${infostar} Working directory: ${DIR}"
 cd ${DIR}
 
 # Create release name
 releasename="${releaseprefix:-release}-`date +%Y%m%d%H%M%S`"
-DST=$(readlink -f "${EXPORT_TARGET}/${releasename}")
+DST="${EXPORT_TARGET}/${releasename}"
 
 # Check that release path exists
 if [ ! -e "${EXPORT_TARGET}" ]; then
@@ -241,9 +255,6 @@ if [ ! -e ${RELEASE_WC} ]; then
 		echo "${errstar} Working copy '${RELEASE_WC}\` does not exist"
 		exit 1
 fi
-
-# normalize symlink path
-SYMLINK_PATH=$(readlink -f "$SYMLINK_PATH")
 
 # Check vcs that we support selected vcs:
 case $VCS in
